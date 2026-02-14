@@ -23,9 +23,7 @@ class KPISnapshot(models.Model):
     uptime_minutes = models.IntegerField(default=0)
     downtime_minutes = models.IntegerField(default=0)
     defect_count = models.IntegerField(default=0)
-    cycle_time_avg_seconds = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True
-    )
+    cycle_time_avg_seconds = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     class Meta:
         indexes = [
@@ -33,9 +31,7 @@ class KPISnapshot(models.Model):
             models.Index(fields=["line", "snapshot_date"]),
             models.Index(fields=["machine", "snapshot_date"]),
         ]
-        unique_together = [
-            ["factory", "line", "machine", "operator", "snapshot_date", "shift"]
-        ]
+        unique_together = [["factory", "line", "machine", "operator", "snapshot_date", "shift"]]
 
     def __str__(self) -> str:
         return f"KPI {self.snapshot_date} (factory={self.factory_id})"

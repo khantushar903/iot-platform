@@ -122,9 +122,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="factory",
-            index=models.Index(
-                fields=["code", "is_active"], name="core_factor_code_dd72bb_idx"
-            ),
+            index=models.Index(fields=["code", "is_active"], name="core_factor_code_dd72bb_idx"),
         ),
         migrations.AddIndex(
             model_name="operator",
@@ -134,15 +132,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="operator",
-            index=models.Index(
-                fields=["employee_id"], name="core_operat_employe_965e63_idx"
-            ),
+            index=models.Index(fields=["employee_id"], name="core_operat_employe_965e63_idx"),
         ),
         migrations.AddIndex(
             model_name="machine",
-            index=models.Index(
-                fields=["line", "is_active"], name="core_machin_line_id_e41561_idx"
-            ),
+            index=models.Index(fields=["line", "is_active"], name="core_machin_line_id_e41561_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="machine",

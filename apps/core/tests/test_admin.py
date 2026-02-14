@@ -24,15 +24,11 @@ class CoreAdminTests(TestCase):
 
         for field in Factory._meta.fields:
             # Skip PK/ID fields
-            if field.primary_key or isinstance(
-                field, (models.AutoField, models.BigAutoField)
-            ):
+            if field.primary_key or isinstance(field, (models.AutoField, models.BigAutoField)):
                 continue
 
             # Skip auto timestamp fields if present
-            if getattr(field, "auto_now", False) or getattr(
-                field, "auto_now_add", False
-            ):
+            if getattr(field, "auto_now", False) or getattr(field, "auto_now_add", False):
                 continue
 
             # Only fill required fields
@@ -73,20 +69,14 @@ class CoreAdminTests(TestCase):
             print("ADMIN FORM ERRORS:", res.context["adminform"].form.errors)
 
         self.assertEqual(res.status_code, 302)  # redirect after success
-        self.assertTrue(
-            Factory.objects.filter(code=payload.get("code", "TF-001")).exists()
-        )
+        self.assertTrue(Factory.objects.filter(code=payload.get("code", "TF-001")).exists())
 
     def test_admin_can_filter_lines_by_factory(self):
         f1 = Factory.objects.create(name="F1", code="F1", is_active=True)
         f2 = Factory.objects.create(name="F2", code="F2", is_active=True)
 
-        Line.objects.create(
-            factory=f1, name="L1", code="L1", capacity_per_hour=10, is_active=True
-        )
-        Line.objects.create(
-            factory=f2, name="L2", code="L2", capacity_per_hour=10, is_active=True
-        )
+        Line.objects.create(factory=f1, name="L1", code="L1", capacity_per_hour=10, is_active=True)
+        Line.objects.create(factory=f2, name="L2", code="L2", capacity_per_hour=10, is_active=True)
 
         url = reverse("admin:core_line_changelist")
         res = self.client.get(url, {"factory__id__exact": str(f1.id)})

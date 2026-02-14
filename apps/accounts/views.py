@@ -19,9 +19,7 @@ def me(request):
 @permission_classes([IsAuthenticated])
 def my_factory(request):
     if request.factory is None:
-        return Response(
-            {"factory": None, "message": "No factory assigned to this user."}
-        )
+        return Response({"factory": None, "message": "No factory assigned to this user."})
 
     return Response(
         {
