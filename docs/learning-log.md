@@ -74,3 +74,57 @@ Day-2 showed me that backend work is deeply connected to database design,
 query performance, migration safety, and documentation.
 Writing models is only part of the responsibility;
 understanding how data is stored, queried, and evolved is equally important.
+
+---
+
+## Day-3: Authentication, RBAC, Tenant Isolation & Django Admin (2026-02-07)
+
+### What I worked on
+
+- Extended Django’s built-in `User` model using a `UserProfile` (factory, role)
+- Implemented JWT authentication using `djangorestframework-simplejwt`
+- Created registration, login, refresh, and protected endpoints
+- Implemented tenant isolation concept using middleware and factory-based filtering
+- Registered all models in Django admin
+- Customized admin with:
+  - `list_display`
+  - `list_filter`
+  - `search_fields`
+- Implemented inline editing (Machines inside Line admin)
+- Added custom admin actions (bulk activate/deactivate)
+- Implemented `AuditLog` model for tracking changes
+- Used Django signals to automatically log create/update events
+- Wrote authentication flow tests and admin tests
+- Documented RBAC and tenant isolation logic
+
+### Key concepts learned
+
+- How JWT authentication works (access token vs refresh token)
+- How backend authentication differs from frontend login logic
+- What RBAC (Role-Based Access Control) means in a real system
+- How tenant isolation ensures data separation between factories
+- Why middleware runs before view logic and how it interacts with authentication
+- How Django admin can be customized beyond default behavior
+- How Django signals allow automatic system-level logging
+- Why testing admin and authentication flows is critical for backend reliability
+
+### Mistakes / challenges
+
+- Confusion about middleware behavior with JWT authentication
+- Admin test initially failed due to missing required fields
+- Encountered formatting conflict between black and isort pre-commit hooks
+
+### How I fixed them
+
+- Clarified request lifecycle and authentication flow
+- Improved test payload logic to dynamically satisfy required model fields
+- Manually ran formatting tools and resolved pre-commit loop safely
+
+### Takeaway
+
+Day-3 helped me understand that backend systems are not only about data models,
+but also about controlling access, isolating tenants, enforcing permissions,
+and maintaining operational visibility through audit logging.
+
+Authentication, authorization, and administrative tooling are critical
+foundations before building complex APIs or analytics features.
