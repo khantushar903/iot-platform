@@ -24,9 +24,7 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/ # noqa: E501
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-470p792q^@fz++&atejdmqx=q+70y=gh5c(cyo^4s(=c@fd(tc"  # noqa: E501
-)
+SECRET_KEY = "django-insecure-470p792q^@fz++&atejdmqx=q+70y=gh5c(cyo^4s(=c@fd(tc"  # noqa: E501
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -48,12 +46,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "apps.core",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "apps.core.apps.CoreConfig",
     "apps.devices",
     "apps.monitoring",
     "apps.reports",
     "apps.alerts",
-    "apps.accounts",
+    "apps.accounts.apps.AccountsConfig",
     "apps.analytics",
 ]
 
@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.accounts.middleware.TenantIsolationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -108,10 +109,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        ),
+        "NAME": ("django.contrib.auth.password_validation." "UserAttributeSimilarityValidator"),
     },
     {
         "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
@@ -124,6 +122,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/ # noqa: E501
