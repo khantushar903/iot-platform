@@ -65,7 +65,7 @@ and preparing code for collaboration and review.
 
 ### How I fixed them
 
-- Break the long lines into short sections
+- Broke long lines into shorter sections
 - Verified the ER diagram visually against models and index plans
 
 ### Takeaway
@@ -128,3 +128,66 @@ and maintaining operational visibility through audit logging.
 
 Authentication, authorization, and administrative tooling are critical
 foundations before building complex APIs or analytics features.
+
+---
+
+## Day-4: Ingestion API, Service Layer & Engineering Discipline (2026-02-14)
+
+### What I worked on
+
+- Implemented a Service Layer (`IngestionService`) to separate business logic from API views
+- Built `POST /api/v1/events/` endpoint for device event ingestion
+- Implemented idempotency using `Idempotency-Key` header
+- Added validation rules in serializer:
+  - Device must exist and be active
+  - Timestamp cannot be in the future
+  - Restricted event_type choices
+- Built `GET /api/v1/events/` with:
+  - Cursor pagination
+  - Filtering (device_id, factory_id, event_type, start, end)
+- Implemented Device CRUD APIs:
+  - GET `/api/v1/devices/`
+  - POST `/api/v1/devices/`
+  - PATCH `/api/v1/devices/<uuid>/`
+  - DELETE `/api/v1/devices/<uuid>/`
+- Wrote API tests for events and devices
+- Measured coverage (devices + services scope: 87%)
+- Measured baseline performance locally (POST ≈110ms, GET ≈59ms)
+- Fixed pre-commit hook order (isort → black → flake8)
+- Unified line length to 100 across black, isort, and flake8
+- Created feature branch and opened Day-4 Pull Request
+
+### Key concepts learned
+
+- Why business logic should live in a service layer instead of API views
+- How idempotency prevents duplicate processing in distributed systems
+- How cursor pagination supports scalable APIs for large datasets
+- Why serializers act as a validation firewall for incoming data
+- How API tests protect endpoint behavior during refactoring
+- How to measure and interpret code coverage properly
+- Why performance measurement matters even during local development
+- How consistent tooling configuration prevents formatting conflicts
+
+### Mistakes / challenges
+
+- Initially measured coverage across the entire project instead of scoped modules
+- Encountered expired JWT tokens during performance measurement
+- Faced formatting conflicts between black and isort
+- Needed to cherry-pick documentation updates across branches
+
+### How I fixed them
+
+- Scoped coverage measurement to relevant modules (devices + services)
+- Re-generated JWT tokens properly before benchmarking
+- Reordered pre-commit hooks and aligned formatting configuration
+
+### Takeaway
+
+Day-4 helped me understand that backend engineering is not just about creating endpoints,
+but about designing reliable, validated, idempotent, and testable systems.
+
+I learned how to structure business logic properly,
+protect data integrity through validation,
+prevent duplicate event processing,
+and maintain engineering discipline through testing,
+coverage measurement, performance awareness, and clean workflow management.
