@@ -105,8 +105,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="device",
-            index=models.Index(
-                fields=["device_id"], name="devices_dev_device__e2c19e_idx"
-            ),
+            index=models.Index(fields=["device_id"], name="devices_dev_device__e2c19e_idx"),
         ),
     ]
