@@ -82,6 +82,6 @@ class CoreAdminTests(TestCase):
         res = self.client.get(url, {"factory__id__exact": str(f1.id)})
 
         self.assertEqual(res.status_code, 200)
-        content = res.content.decode("utf-8")
-        self.assertIn("L1", content)
-        self.assertNotIn("L2", content)
+        qs = res.context["cl"].queryset
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first().name, "L1")
