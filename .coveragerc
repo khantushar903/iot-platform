@@ -1,0 +1,17 @@
+[run]
+branch = True
+source =
+    apps.devices
+    services
+
+omit =
+    */migrations/*
+    */__init__.py
+    */tests/*
+    manage.py
+    config/*
+
+[report]
+show_missing = True
+skip_covered = True
+fail_under = 80
