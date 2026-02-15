@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from django.db import transaction
 
 from apps.devices.models import Device, Event
+from tasks.ingestion_tasks import process_event_async
 
 
 class IngestionService:
@@ -32,4 +33,5 @@ class IngestionService:
             event_type=event_type,
             idempotency_key=idempotency_key,
         )
+        process_event_async.delay(event.id)
         return event, True
