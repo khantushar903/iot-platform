@@ -19,8 +19,25 @@ class EventCreateAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         idempotency_key = request.headers.get("Idempotency-Key")
+        try:
+            factory = request.user.userprofile.factory
+        except Exception:
+            return Response(
+                {"detail": "No factory assigned to this user."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Ensure device belongs to user's factory
+        if not Device.objects.filter(
+            device_id=serializer.validated_data["device_id"], factory=factory
+        ).exists():
+            return Response(
+                {"detail": "Device not found in your factory."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         event, created = IngestionService.create_event(
+            factory_id=str(factory.id),
             device_id=serializer.validated_data["device_id"],
             payload=serializer.validated_data["payload"],
             timestamp=serializer.validated_data["timestamp"],
@@ -40,17 +57,20 @@ class EventCreateAPIView(APIView):
         )
 
     def get(self, request):
-        qs = Event.objects.select_related("device").all().order_by("-timestamp")
+        try:
+            factory = request.user.userprofile.factory
+        except Exception:
+            return Response(
+                {"detail": "No factory assigned to this user."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        qs = Event.objects.select_related("device").filter(factory=factory).order_by("-timestamp")
 
         # Filters (query params)
-        factory_id = request.query_params.get("factory_id")
         device_id = request.query_params.get("device_id")
         event_type = request.query_params.get("event_type")
         start = request.query_params.get("start")
         end = request.query_params.get("end")
-
-        if factory_id:
-            qs = qs.filter(factory_id=factory_id)
 
         if device_id:
             qs = qs.filter(device__device_id=device_id)
@@ -77,10 +97,22 @@ class EventCreateAPIView(APIView):
 class DeviceListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DeviceSerializer
-    queryset = Device.objects.all().select_related("factory", "machine")
+
+    def get_queryset(self):
+        try:
+            factory = self.request.user.userprofile.factory
+        except Exception:
+            return Device.objects.none()
+        return Device.objects.filter(factory=factory).select_related("factory", "machine")
 
 
 class DeviceDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DeviceSerializer
-    queryset = Device.objects.all().select_related("factory", "machine")
+
+    def get_queryset(self):
+        try:
+            factory = self.request.user.userprofile.factory
+        except Exception:
+            return Device.objects.none()
+        return Device.objects.filter(factory=factory).select_related("factory", "machine")

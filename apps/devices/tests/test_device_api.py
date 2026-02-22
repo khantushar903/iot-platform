@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.accounts.models import UserProfile
 from apps.core.models import Factory
 from apps.devices.models import Device
 
@@ -16,6 +17,15 @@ class DeviceAPITests(APITestCase):
     def setUp(self):
         self.factory = Factory.objects.create(name="Factory 1", code="F1")
 
+        self.user = User.objects.create_user(username="u1", password="pass12345")
+        UserProfile.objects.filter(user=self.user).update(
+            factory=self.factory,
+            role="manager",
+        )
+
+        token = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.access_token}")
+
         self.device = Device.objects.create(
             factory=self.factory,
             machine=None,
@@ -25,11 +35,6 @@ class DeviceAPITests(APITestCase):
             is_active=True,
             metadata={},
         )
-
-        self.user = User.objects.create_user(username="u1", password="pass12345")
-        token = RefreshToken.for_user(self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.access_token}")
-
         self.list_url = reverse("device-list-create")
         self.detail_url = reverse("device-detail", kwargs={"pk": self.device.pk})
 

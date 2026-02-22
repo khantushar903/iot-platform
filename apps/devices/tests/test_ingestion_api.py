@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.accounts.models import UserProfile
 from apps.core.models import Factory
 from apps.devices.models import Device, Event
 
@@ -31,6 +32,11 @@ class EventIngestionAPITests(APITestCase):
 
         # Create user + JWT token
         self.user = User.objects.create_user(username="u1", password="pass12345")
+
+        UserProfile.objects.filter(user=self.user).update(
+            factory=self.factory,
+            role="manager",
+        )
 
         token = RefreshToken.for_user(self.user)
         self.access_token = str(token.access_token)
