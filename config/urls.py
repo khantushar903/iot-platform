@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.permissions import AllowAny
@@ -16,4 +17,13 @@ urlpatterns = [
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/v1/", include("apps.devices.urls")),
     path("api/schema/", schema_view, name="api-schema"),
+    path("api/v1/", include("apps.monitoring.urls")),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+        path("silk/", include("silk.urls", namespace="silk")),
+    ]
