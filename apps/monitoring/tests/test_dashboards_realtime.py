@@ -1,9 +1,12 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.db import connection
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -16,6 +19,18 @@ TEST_CACHE = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
+
+
+def _without_profiling_middleware(middleware_list):
+    """
+    Remove Silk + Debug Toolbar middleware so assertNumQueries measures your code,
+    not profiling/instrumentation queries.
+    """
+    blocked = (
+        "silk.middleware.SilkyMiddleware",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    )
+    return [m for m in middleware_list if m not in blocked]
 
 
 @override_settings(CACHES=TEST_CACHE)
@@ -128,7 +143,6 @@ class RealtimeDashboardStatusPrecedenceTests(TestCase):
             payload={"output_count": 1},
         )
 
-        # DowntimeReason model fields: code, description, category
         reason = DowntimeReason.objects.create(
             factory=self.factory,
             code="TEST",
@@ -137,7 +151,6 @@ class RealtimeDashboardStatusPrecedenceTests(TestCase):
             is_active=True,
         )
 
-        # Active downtime: ended_at = None
         DowntimeLog.objects.create(
             factory=self.factory,
             machine=self.machine,
@@ -151,3 +164,47 @@ class RealtimeDashboardStatusPrecedenceTests(TestCase):
 
         line_data = r.data["lines"][0]
         self.assertEqual(line_data["status"], "DOWN")
+
+
+@override_settings(CACHES=TEST_CACHE)
+class RealtimeDashboardMultipleLinesTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.factory = Factory.objects.create(name="Factory M", code="FM")
+
+        self.user = get_user_model().objects.create_user(
+            username="user_multi_line", password="pass1234"
+        )
+        profile = self.user.userprofile
+        profile.factory = self.factory
+        profile.role = "admin"
+        profile.save()
+
+        self.line_1 = Line.objects.create(
+            factory=self.factory, name="Line 1", code="L1", is_active=True
+        )
+        self.line_2 = Line.objects.create(
+            factory=self.factory, name="Line 2", code="L2", is_active=True
+        )
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_realtime_dashboard_returns_all_lines_in_factory(self):
+        r = self.client.get("/api/v1/dashboards/realtime/")
+        self.assertEqual(r.status_code, 200)
+
+        line_ids = {item["id"] for item in r.data["lines"]}
+        self.assertIn(str(self.line_1.id), line_ids)
+        self.assertIn(str(self.line_2.id), line_ids)
+        self.assertGreaterEqual(len(r.data["lines"]), 2)
+
+    @override_settings(MIDDLEWARE=_without_profiling_middleware(settings.MIDDLEWARE))
+    def test_realtime_dashboard_query_count_under_limit(self):
+        cache.clear()  # ensure no cache hit
+
+        with CaptureQueriesContext(connection) as ctx:
+            r = self.client.get("/api/v1/dashboards/realtime/")
+            self.assertEqual(r.status_code, 200)
+
+        self.assertLessEqual(len(ctx), 3)

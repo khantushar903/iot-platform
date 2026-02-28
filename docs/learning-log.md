@@ -355,3 +355,95 @@ The system now supports fully automated daily KPI computation,
 bringing it closer to real-world enterprise backend architecture.
 
 ---
+
+Perfect — I’ve read your learning-log style carefully. Below is the **Day-8 section written in the exact same tone, structure, and depth** as your previous days.
+
+You can paste this directly below Day-7.
+
+---
+
+## Day-8: Dashboard APIs, Redis Caching & Performance Validation (2026-02-23)
+
+### What I worked on
+
+- Implemented `GET /api/v1/dashboards/realtime/` endpoint for live factory overview
+- Implemented `GET /api/v1/dashboards/line/{id}/summary/` for date-range KPI aggregation
+- Designed dashboard response structure optimized for frontend consumption
+- Integrated Redis caching for realtime dashboard responses (60s TTL)
+- Implemented cache invalidation via Django signals on Event creation
+- Ensured tenant isolation in dashboard queries
+- Profiled queries using Django Silk to verify no N+1 issues
+- Benchmarked API latency using PowerShell (20-sample p50/p95 test)
+- Measured cache hit ratio using generated_at comparison strategy
+- Verified total test coverage (>75% requirement)
+- Documented performance results in `dashboard-api.md`
+- Logged and documented Redis-related bug
+
+---
+
+### Key concepts learned
+
+- Difference between cold cache and warm cache performance
+- How response caching reduces query count and stabilizes latency
+- Why cache invalidation is more complex than caching itself
+- How to verify cache behavior using deterministic timestamps
+- How to measure p95 latency using repeat sampling
+- How to interpret Silk profiling output (query count + SQL time)
+- Why performance validation must include both latency and query analysis
+- How to safely integrate Redis into a Django project
+- How backend dashboards should be optimized for read-heavy workloads
+- Why performance targets (e.g., p95 < 500ms) matter in production systems
+
+---
+
+### Mistakes / challenges
+
+- Faced Redis connection refused (10061) errors during testing
+- Tests failed when Redis container was not running
+- Confusion between local memory cache vs Redis backend
+- Initially did not differentiate cold vs warm cache during benchmarking
+
+---
+
+### How I fixed them
+
+- Started Redis container via Docker and verified connectivity
+- Activated virtual environment properly in standalone PowerShell
+- Cleared cache before benchmarking to separate cold/warm behavior
+- Used repeated request pairs to measure steady-state hit ratio
+- Validated query count using Django Silk profiling dashboard
+- Ensured signals correctly invalidated cache on event writes
+
+---
+
+### Takeaway
+
+Day-8 transformed the system from analytics computation
+into a production-ready dashboard layer.
+
+I learned that building dashboards is not only about aggregating data,
+but also about:
+
+- minimizing database load
+- preventing N+1 query problems
+- validating performance empirically
+- handling cache invalidation safely
+- measuring p95 latency realistically
+- maintaining test coverage discipline
+
+The backend now supports:
+
+- realtime cached dashboards
+- aggregated line summaries
+- Redis-backed performance optimization
+- documented performance guarantees
+- > 75% test coverage (achieved 88%)
+- p95 latency well below the 500ms target
+
+Day-8 strengthened my understanding of backend performance engineering,
+observability, and production-readiness.
+
+The system is now optimized not only for correctness,
+but also for scalability and measurable performance.
+
+---

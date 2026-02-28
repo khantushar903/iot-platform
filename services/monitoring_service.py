@@ -84,21 +84,21 @@ def get_realtime_dashboard(factory_id) -> dict[str, Any]:
         else:
             status = "IDLE"
 
-    lines.append(
-        {
-            "id": str(line.id),
-            "name": line.name,
-            "code": line.code,
-            "status": status,
-            "last_event_at": (
-                line.last_production_at.isoformat() if line.last_production_at else None
-            ),
-            "metrics": {
-                "today_production": int(line.today_production or 0),
-                "today_downtime_minutes": int(line.today_downtime_minutes or 0),
-            },
-        }
-    )
+        lines.append(
+            {
+                "id": str(line.id),
+                "name": line.name,
+                "code": line.code,
+                "status": status,
+                "last_event_at": (
+                    line.last_production_at.isoformat() if line.last_production_at else None
+                ),
+                "metrics": {
+                    "today_production": int(line.today_production or 0),
+                    "today_downtime_minutes": int(line.today_downtime_minutes or 0),
+                },
+            }
+        )
 
     return {
         "factory_id": str(factory_id),
